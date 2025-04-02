@@ -9,7 +9,8 @@ Page({
         canNavigate: true,
         searchKeyword: '',
         searchResults: [],
-        showCampusOnly: false
+        showCampusOnly: false,
+        destination: null,
     },
 
     onLoad(options) {
@@ -75,6 +76,7 @@ Page({
 
     handleSearchInput(e) {
         this.setData({ searchKeyword: e.detail.value });
+        console.log('search input')
     },
 
     handleSearchSubmit() {
@@ -82,6 +84,7 @@ Page({
             this.showToast('请输入搜索关键词');
             return;
         }
+        console.log("get the data from the input box")
         
         wx.request({
             url: 'https://apis.map.qq.com/ws/place/v1/search',
@@ -102,6 +105,8 @@ Page({
                     }));
                     
                     // 更新搜索结果和地图标记
+                    console.log("output the searching result")
+                    console.log(results)
                     const markers = results.map((item, index) => ({
                         id: index,
                         latitude: item.latitude,
@@ -111,11 +116,12 @@ Page({
                         width: 30,
                         height: 30
                     }));
-                    
+                    //console.log(data.searchResults)
                     this.setData({
                         searchResults: results,
                         markers: markers
                     });
+                    //console.log(data.searchResults);
                 } else {
                     this.showToast('搜索失败：' + (res.data.message || '未知错误'));
                 }
@@ -127,9 +133,8 @@ Page({
         });
     },
 
-    
-
     startNavigation(e) {
+        console.log("开始导航服务选择")
         if (!this.data.canNavigate) {
             this.showToast('校外用户仅限查看校园地图');
             return;
@@ -137,21 +142,60 @@ Page({
     
         const target = {
             latitude: e.currentTarget.dataset.latitude,
-            longitude: e.currentTarget.dataset.longitude
+            longitude: e.currentTarget.dataset.longitude,
+            name: e.currentTarget.dataset.title || "目的地",
+            address: e.currentTarget.dataset.address || ""
         };
     
-        try {
-            const plugin = requirePlugin('routePlan');
-            wx.navigateTo({
-                url: `plugin://routePlan/index?key=${TENCENT_MAP_KEY}&referer=鲁大导航&endPoint=${encodeURIComponent(JSON.stringify({
-                    name: "目的地",
-                    latitude: target.latitude,
-                    longitude: target.longitude
-                }))}`
-            });
-        } catch (err) {
-            this.showToast('导航功能初始化失败');
-        }
+        wx.showActionSheet({
+            itemList: ['查看路线规划', '使用外部导航'],
+            success: (res) => {
+                switch (res.tapIndex) {
+                    case 0:  // 查看路线规划选择
+                        try {
+                            const plugin = requirePlugin('routePlan');
+                            console.log("调用路线规划api服务");
+                            wx.navigateTo({
+                                url: `plugin://routePlan/index?key=${TENCENT_MAP_KEY}&referer=鲁大导航&endPoint=${encodeURIComponent(JSON.stringify({
+                                    name: target.name,
+                                    latitude: target.latitude,
+                                    longitude: target.longitude
+                                }))}`
+                            });
+                        } catch (err) {
+                            this.showToast('路线规划功能初始化失败');
+                        }
+                        break;
+                    
+                    case 1:  // 使用外部导航
+                        console.log("start outside app navigation");
+                        wx.getLocation({
+                            type: 'gcj02',
+                            success: (location) => {
+                                wx.showModal({
+                                    title: '导航提示',
+                                    content: '是否打开外部app进行导航？',
+                                    success: (res) => {
+                                        if (res.confirm) {
+                                            wx.openLocation({
+                                                latitude: parseFloat(target.latitude),
+                                                longitude: parseFloat(target.longitude),
+                                                name: target.name,
+                                                address: target.address,
+                                                scale: 18
+                                            });
+                                        }
+                                    }
+                                });
+                            },
+                            fail: () => {
+                                this.showToast('获取当前位置失败');
+                            }
+                        });
+                        break;
+                }
+            }
+        });
     },
 
     showToast(msg) {

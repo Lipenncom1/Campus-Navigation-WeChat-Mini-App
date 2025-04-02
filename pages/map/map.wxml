@@ -22,26 +22,19 @@
   </view>
 
   <!-- 搜索结果列表 -->
-  <scroll-view 
-    wx:if="{{searchResults.length}}" 
-    class="search-results"
-    scroll-y
-  >
-    <view 
-      wx:for="{{searchResults}}" 
-      wx:key="id"
-      class="result-item" 
-      bindtap="startNavigation"
-      data-latitude="{{item.latitude}}"
-      data-longitude="{{item.longitude}}"
-    >
-      <text class="title">{{item.title}}</text>
-      <text class="address">{{item.address}}</text>
+  <scroll-view wx:if="{{searchResults.length}}" class="search-results" scroll-y>
+    <view wx:for="{{searchResults}}" wx:key="id" class="result-item">
+        <view class="result-info" 
+              bindtap="startNavigation" 
+              data-latitude="{{item.latitude}}" 
+              data-longitude="{{item.longitude}}"
+              data-title="{{item.title}}"
+              data-address="{{item.address}}">
+            <text class="title">{{item.title}}</text>
+            <text class="address">{{item.address}}</text>
+        </view>
     </view>
+</scroll-view>
 
-    <view wx:if="{{ isSearching }}" class="search-loading">
-        <image src="/images/loading.gif" class="loading-icon"/>
-        <text>搜索中... </text>
-    </view>
-  </scroll-view>
+    
 </map>
