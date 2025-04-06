@@ -1,0 +1,74 @@
+<!-- pages/comment/comments.wxml -->
+<view class="community-container">
+  <!-- 文字输入框 -->
+  <view class="publish-bar" style="padding-bottom: env(safe-area-inset-bottom);">
+    <input 
+      type="text" 
+      placeholder="{{isReply?'回复评论...':'说点什么...（带图/评分）'}}" 
+      value="{{isReply?replyComment:comment}}" 
+      bindinput="{{isReply?'onReplyChange':'onCommentChange'}}"
+      focus="{{isInputFocus}}"
+    />
+    <button bindtap="{{isReply?'onReplySubmit':'onSubmit'}}" size="mini">{{isReply?'回复':'提交'}}</button>
+  </view>
+  <!-- 发布入口（放置在文字输入框上方） -->
+  <view class="publish-actions">
+    <view class="action-button" bindtap="onChooseImage">
+      <image src="/icons/camera.png" class="icon" style="width: 40rpx; height: 40rpx;"></image>
+      <text>发布图片</text>
+    </view>
+    <view class="action-button" bindtap="showScoreSelector">
+      <icon type="star" size="24" color="#ffd700"></icon>
+      <text>评分</text>
+    </view>
+  </view>
+  <!-- 评分选择器 -->
+  <view class="score-selector" wx:if="{{isScoreSelectorVisible}}">
+    <view class="score-star" wx:if="{{!isReply}}">
+      <icon type="star" size="24" color="{{score>=index+1?'#ffd700':'#666'}}" wx:for="5" wx:key="*this" data-index="{{index}}" bindtap="onScoreSelect"></icon>
+    </view>
+    <button bindtap="hideScoreSelector" size="mini">关闭</button>
+  </view>
+  <!-- 评论列表 -->
+  <scroll-view class="comment-list" scroll-y bindscrolltolower="loadMoreComments">
+    <view class="comment-card" wx:for="{{commentList}}" wx:key="id" wx:for-item="item">
+      <!-- 头部信息 -->
+      <view class="card-header">
+        <image src="{{item.avatar || '/icons/default_avatar.png'}}" class="avatar"></image>
+        <view class="user-info">
+          <text class="nickname">{{item.nickname || '匿名用户'}}</text>
+          <text class="time">{{item.time}}</text>
+        </view>
+        <text class="score-tag">{{item.score}}分</text>
+      </view>
+      
+      <!-- 内容区 -->
+      <view class="card-content">
+        <text>{{item.comment}}</text>
+        <view class="media-gallery">
+          <image wx:for="{{item.images}}" wx:key="url" src="{{url}}" class="media-item" bindtap="previewImage" data-src="{{url}}"></image>
+        </view>
+      </view>
+
+      <!-- 互动区 -->
+      <view class="card-actions">
+        <view class="reply-btn" bindtap="onReplyClick" data-index="{{index}}">
+          <icon type="chatbubble-o" size="20" color="#999"></icon> 
+          <text>{{item.replies.length}}回复</text>
+        </view>
+        <view class="like-btn" bindtap="toggleLike" data-comment-id="{{index}}">
+          <icon type="{{item.isLiked?'heart':'heart-o'}}" size="20" color="{{item.isLiked?'#ff4d4f':'#999'}}"></icon> 
+          <text>{{item.likeCount || 0}}</text>
+        </view>
+      </view>
+
+      <!-- 回复列表 -->
+      <view class="reply-list">
+        <view class="reply-item" wx:for="{{item.replies}}" wx:key="rid" wx:for-item="reply">
+          <text class="reply-nick">@{{reply.fromNick || '匿名用户'}}：</text>
+          <text>{{reply.content}}</text>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+</view>
