@@ -1,0 +1,30 @@
+.container {
+    padding: 20rpx;
+}
+  
+.history-list {
+    margin-bottom: 40rpx;
+}
+  
+.history-item {
+    padding: 24rpx;
+    border-bottom: 1rpx solid #eee;
+}
+  
+.empty-tips {
+    text-align: center;
+    padding: 40rpx;
+    color: #999;
+}
+  
+.clear-btn {
+    position: fixed;
+    bottom: 40rpx;
+    left: 20rpx;
+    right: 20rpx;
+    background: #ff4444;
+    color: white;
+    text-align: center;
+    padding: 20rpx;
+    border-radius: 8rpx;
+}

@@ -1,0 +1,15 @@
+<view class="container">
+    <view wx:if="{{searchHistory.length}}" class="history-list">
+        <view wx:for="{{searchHistory}}" wx:key="*this" class="history-item" bindtap="onHistoryItemClick" data-keyword="{{item}}">
+            <text>{{item}}</text>
+        </view>
+    </view>
+  
+    <view wx:else class="empty-tips">
+        <text>暂无搜索历史</text>
+    </view>
+  
+    <view wx:if="{{searchHistory.length}}" class="clear-btn" bindtap="clearSearchHistory">
+        <text>清空搜索历史</text>
+    </view>
+</view>

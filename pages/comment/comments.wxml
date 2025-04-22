@@ -1,0 +1,102 @@
+<!-- pages/comment/comments.wxml -->
+<view class="community-container">
+  <!-- 文字输入框 -->
+  <view class="publish-bar" style="padding-bottom: env(safe-area-inset-bottom);">
+    <input 
+      type="text" 
+      placeholder="{{isReply?'回复评论...':'说点什么...（带图）'}}" 
+      value="{{isReply?replyComment:comment}}" 
+      bindinput="{{isReply?'onReplyChange':'onCommentChange'}}"
+      focus="{{isInputFocus}}"
+    />
+    <button bindtap="{{isReply?'onReplySubmit':'onSubmit'}}" size="mini">{{isReply?'回复':'提交'}}</button>
+    <button bindtap="showScorePopup" size="mini">打分</button>
+  </view>
+  <!-- 发布入口（放置在文字输入框上方） -->
+  <view class="publish-actions">
+    <view class="action-button" bindtap="onChooseImage">
+      <image src="/icons/camera.png" class="icon" style="width: 40rpx; height: 40rpx;"></image>
+      <text>发布图片</text>
+    </view>
+  </view>
+  <!-- 评分弹窗 -->
+  <view wx:if="{{isScorePopupVisible}}" class="score-popup">
+    <view class="score-popup-content">
+      <text>请选择评分（1-5分）</text>
+      <!-- 添加 slider 组件 -->
+      <slider 
+        min="1" 
+        max="5" 
+        step="1" 
+        value="{{score}}" 
+        bindchange="onScoreChange"
+        show-value
+      />
+      <!-- 添加确认按钮 -->
+      <button bindtap="confirmScore">确认</button>
+      <button bindtap="hideScorePopup">取消</button>
+    </view>
+  </view>
+  <!-- 评论列表 -->
+  <scroll-view class="comment-list" scroll-y bindscrolltolower="loadMoreComments">
+    <view class="comment-card" wx:for="{{commentList}}" wx:key="_id" wx:for-item="item" wx:for-index="commentIndex">
+      <!-- 头部信息 -->
+      <view class="card-header">
+        <image src="{{item.avatar || '/icons/default_avatar.png'}}" class="avatar"></image>
+        <view class="user-info">
+          <text class="nickname">{{item.nickname || '匿名用户'}}</text>
+          <text class="time">{{item.time}}</text>
+        </view>
+      </view>
+      
+      <!-- 内容区 -->
+      <view class="card-content">
+        <text>{{item.comment}}</text>
+        <view class="media-gallery">
+          <!-- <image
+          wx:for="{{item.images}}"
+          wx:key="url"
+          src="{{url}}"
+          class="media-item"
+          bindtap="previewImage"
+          data-src="{{url}}"
+          data-comment-index="{{commentIndex}}">
+          </image> -->
+          <image 
+            wx:for="{{item.images}}" 
+            wx:key="*this" 
+            src="{{item}}" 
+            class="media-item" 
+            bindtap="previewImage" 
+            data-urls="{{item.images}}" 
+            data-current="{{item}}"
+            data-src="{{url}}"
+            data-comment-index="{{commentIndex}}"
+        ></image>
+        </view>
+        <text>评分: {{item.score}}分</text>
+      </view>
+
+      <!-- 互动区 -->
+      <view class="card-actions">
+        <view class="reply-btn" bindtap="onReplyClick" data-index="{{commentIndex}}">
+          <icon type="chatbubble-o" size="20" color="#999"></icon> 
+          <text>{{item.replies.length}}回复</text>
+        </view>
+        <view class="like-btn" bindtap="toggleLike" data-comment-id="{{commentIndex}}">
+          <!-- 修改点赞图标路径 -->
+          <image src="{{item.isLiked?'/pages/images/liked.png':'/pages/images/unliked.png'}}" style="width: 20rpx; height: 20rpx;"></image> 
+          <text>{{item.likeCount || 0}}</text>
+        </view>
+      </view>
+
+      <!-- 回复列表 -->
+      <view class="reply-list">
+        <view class="reply-item" wx:for="{{item.replies}}" wx:key="rid" wx:for-item="reply">
+          <text class="reply-nick">@{{reply.fromNick || '匿名用户'}}：</text>
+          <text>{{reply.content}}</text>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+</view>
